@@ -5,7 +5,7 @@ import { itemSearch } from '../js/constants';
 
 const inputEl = document.querySelector('.searchQuery');
 const searchEl = document.querySelector('button');
-const listGallery = document.querySelector('.gallery');
+const divGallery = document.querySelector('.gallery');
 
 searchEl.addEventListener('click', handlerSearh);
 
@@ -16,13 +16,15 @@ searchEl.addEventListener('click', handlerSearh);
 //   .map(technology => `<li class="list-item">${technology}</li>`)
 //   .join('');
 
+const arrayList = []
+const everyItem = arrayList.tags
+
 function handlerSearh(e) {
   e.preventDefault();
-  const itemSearch = e.currentTarget.value;
-  fetchItem(itemSearch)
-    .then(data => {
-      const tags = data[0];
-      listGallery.innerHTML = `<ul><li>
+function functionSearh() {
+  if (arrayList.tags.includes(itemSearch.tags)) {
+    arrayList.filter(itemSearch);
+        divGallery.innerHTML = `<ul><li>
       <div class = "photo-card">
         <img
           src = "${webformatURL}"
@@ -46,12 +48,18 @@ function handlerSearh(e) {
         </div>
       </div>
     </li>
-      </ul>`;
-    })
+      </ul>`
+  }
+const itemSearch = e.currentTarget.value;
+  fetchItem(itemSearch)
+    .then(functionSearh)
+    console.log (everyItem(tags))
     .catch(error => {
       messageError();
     });
 }
+
+
 function messageError() {
   Notiflix.Notify.failure(
     'Oops! Something went wrong! Try reloading the page!',
@@ -59,4 +67,5 @@ function messageError() {
       timeout: 2000,
     }
   );
+}
 }
