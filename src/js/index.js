@@ -1,4 +1,5 @@
 import { BASE_URL, API_KEY } from './constants';
+import NewsApiService from './news-service';
 
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
@@ -7,70 +8,91 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const inputEl = document.querySelector('.searchQuery');
 const searchEl = document.querySelector('button');
 
-const photoListEl = document.querySelector('.movie-list');
-const loadMoreEl = document.querySelector('.load-more');
-
-let page = 1;
-
-const renderList = (arr, container) => {
-  const markup = arr.map(
-      (item) => `<li>
-  <div class = "photo-card">
-  <img src = ${item.webformatURL} alt = ${item.tags}
-          loading = "lazy"
-          width = "400"
-        />
-        <div clas = "info">
-          <p class = "info-item">
-            <b>Likes ${item.likes}</b>
-          </p>
-          <p class = "info-item">
-            <b>Views ${item.views}</b>
-          </p>
-          <p class = "info-item">
-            <b>Comments ${item.comments}</b>
-          </p>
-          <p class = "info-item">
-            <b>Downloads ${item.downloads}</b>
-          </p>
-        </div>
-      </div>
-    </li>`
-    )
-    .join();
-
-  container.insertAdjacentHTML('beforeend', markup);
+const refs = {
+  serchForm: document.querySelector('.search-form'),
+  articlesContainer: document.querySelector('.js-list'),
+  loadMoreEl: document.querySelector('.load-more'),
 };
+const newApiService = new NewsApiService();
 
-const fetchItem = () => {
-  const params = new URLSearchParams({
-    key: API_KEY,
-    q: '',
-    image_type: 'photo',
-    orientation: 'horizontal',
-    safesearch: 'true',
-    page,
-    per_page: 40,
+refs.serchForm.addEventListener('submit', onSerch);
+refs.loadMoreEl.addEventListener('click', onLoadMore);
+
+function onSerch(e) {
+  e.preventDefault();
+  newApiService.searchQuery = e.currentTarget.elements.searchQuery.value;
+  newApiService.resetPage();
+  newApiService.fetchArticles().then(hits => console.log(hits));
+}
+
+function onLoadMore() {
+  newApiService.fetchArticles().then(appendArt);
+}
+import paint from '../styles.css';
+function appendArt(hits) {
+  refs.articlesContainer.insertAdjacentElement('beforeend', paint(hits));
+}
+function paint(hits) {
+  each(data.hits, function (i, hit) {
+    console.log(hit.pageURL);
   });
-  const endpoint = BASE_URL + '/?' + params.toString();
+}
+//   <div class = "photo-card">
+//   <img src = ${item.webformatURL} alt = ${item.tags}
+//           loading = "lazy"
+//           width = "400"
+//         />
+//         <div clas = "info">
+//           <p class = "info-item">
+//             <b>Likes ${item.likes}</b>
+//           </p>
+//           <p class = "info-item">
+//             <b>Views ${item.views}</b>
+//           </p>
+//           <p class = "info-item">
+//             <b>Comments ${item.comments}</b>
+//           </p>
+//           <p class = "info-item">
+//             <b>Downloads ${item.downloads}</b>
+//           </p>
+//         </div>
+//       </div>
+//     </li>`
+//     )
+//     .join();
 
-  return fetch(endpoint).then(res => {
-    if (res.status === 200) {
-      return res.json();
-    }
-    throw new Error(res.statusText);
-  });
-};
+//   container.insertAdjacentHTML('beforeend', markup);
+// };
 
-const loadMoreHandler = () => {
-  page += 1;
+// const fetchItem = () => {
+//   const params = new URLSearchParams({
+//     key: API_KEY,
+//     q: '',
+//     image_type: 'photo',
+//     orientation: 'horizontal',
+//     safesearch: 'true',
+//     page,
+//     per_page: 40,
+//   });
+//   const endpoint = BASE_URL + '/?' + params.toString();
 
-  fetchItem().then(data => console.log(data));
-};
+//   return fetch(endpoint).then(res => {
+//     if (res.status === 200) {
+//       return res.json();
+//     }
+//     throw new Error(res.statusText);
+//   });
+// };
 
-fetchItem().then(res => renderList(res.results, photoListEl));
+// const loadMoreHandler = () => {
+//   page += 1;
 
-loadMoreEl.addEventListener('click', loadMoreHandler);
+//   fetchItem().then(data => console.log(data));
+// };
+
+// fetchItem().then(res => renderList(res.results, photoListEl));
+
+// loadMoreEl.addEventListener('click', loadMoreHandler);
 
 // searchEl.addEventListener('click', handlerSearh);
 
