@@ -1,24 +1,19 @@
 import { BASE_URL, API_KEY } from './constants';
+import axios from 'axios';
 
 export default class NewsApiService {
   constructor() {
     this.formSearch = '';
     this.page = 1;
   }
-  fetchArticles() {
+  async fetchArticles() {
     console.log('До', this);
     const url = `${BASE_URL}/?key=${API_KEY}&q=${this.formSearch}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${this.page}`;
-
-    return fetch(url)
-      .then(r => r.json())
-      .then(data => {
-        this.incrementPage();
-        return data.hits;
-      });
-  }
-
-  incrementPage() {
+    const response = await axios.get(url);
+    const data = await response.data;
     this.page += 1;
+    return data;
+    console.log(data.hits);
   }
 
   resetPage() {

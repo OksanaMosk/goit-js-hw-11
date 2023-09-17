@@ -1,5 +1,6 @@
 import { BASE_URL, API_KEY } from './constants';
 import NewsApiService from './news-service';
+import axios from 'axios';
 
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
@@ -31,7 +32,7 @@ function onLoadMore() {
 }
 
 function renderPhotoCard(data) {
-  const results = data;
+  const results = data.hits;
   const stringTag = results
     .map(
       ({
