@@ -26,17 +26,9 @@ function onSerch(e) {
 }
 
 function onLoadMore() {
-  newApiService.fetchArticles().then(appendArt);
+  newApiService.fetchArticles();
 }
-import paint from '../styles.css';
-function appendArt(hits) {
-  refs.articlesContainer.insertAdjacentElement('beforeend', paint(hits));
-}
-function paint(hits) {
-  each(data.hits, function (i, hit) {
-    console.log(hit.pageURL);
-  });
-}
+
 //   <div class = "photo-card">
 //   <img src = ${item.webformatURL} alt = ${item.tags}
 //           loading = "lazy"
