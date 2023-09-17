@@ -12,9 +12,13 @@ export default class NewsApiService {
     return fetch(url)
       .then(r => r.json())
       .then(data => {
-        this.page += 1;
+        this.incrementPage();
         return data.hits;
       });
+  }
+
+  incrementPage() {
+    this.page += 1;
   }
 
   resetPage() {

@@ -26,7 +26,7 @@ function onSerch(e) {
 }
 
 function onLoadMore() {
-  newApiService.fetchArticles();
+  newApiService.fetchArticles().then(hits => console.log(hits));
 }
 
 //   <div class = "photo-card">
