@@ -10,9 +10,10 @@ const searchEl = document.querySelector('button');
 
 const refs = {
   serchForm: document.querySelector('.search-form'),
-  articlesContainer: document.querySelector('.js-list'),
+  galleryEl: document.querySelector('.gallery'),
   loadMoreEl: document.querySelector('.load-more'),
 };
+
 const newApiService = new NewsApiService();
 
 refs.serchForm.addEventListener('submit', onSerch);
@@ -22,11 +23,59 @@ function onSerch(e) {
   e.preventDefault();
   newApiService.searchQuery = e.currentTarget.elements.searchQuery.value;
   newApiService.resetPage();
-  newApiService.fetchArticles().then(hits => console.log(hits));
+  newApiService
+    .fetchArticles()
+    .then(renderPhotoCard)
+    .then(hits => console.log(hits));
 }
 
 function onLoadMore() {
-  newApiService.fetchArticles().then(hits => console.log(hits));
+  newApiService
+    .fetchArticles()
+    .then(renderPhotoCard())
+    .then(hits => console.log(hits));
+}
+
+function renderPhotoCard(data) {
+  const results = data.hits;
+  const stringTag = results
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => {
+        return `<div class="photo-card"> <a href="${largeImageURL}">
+        <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+        <div class="info">
+        <p class="info-item">
+            <b>Likes</b> ${likes}
+        </p>
+        <p class="info-item">
+            <b>Views</b> ${views}
+        </p>
+        <p class="info-item">
+            <b>Comments</b> ${comments}
+        </p>
+        <p class="info-item">
+            <b>Downloads</b> ${downloads}
+        </p>
+        </div></a>
+    </div>`;
+      }
+    )
+    .join('');
+
+  refs.galleryEl.insertAdjacentHTML('beforeend', stringTag);
+
+  new SimpleLightbox('.photo-card a', {
+    captionsData: 'alt',
+    captionDelay: 250,
+  });
 }
 
 //   <div class = "photo-card">
