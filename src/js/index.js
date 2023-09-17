@@ -23,21 +23,15 @@ function onSerch(e) {
   e.preventDefault();
   newApiService.searchQuery = e.currentTarget.elements.searchQuery.value;
   newApiService.resetPage();
-  newApiService
-    .fetchArticles()
-    .then(renderPhotoCard)
-    .then(hits => console.log(hits));
+  newApiService.fetchArticles().then(renderPhotoCard);
 }
 
 function onLoadMore() {
-  newApiService
-    .fetchArticles()
-    .then(renderPhotoCard())
-    .then(hits => console.log(hits));
+  newApiService.fetchArticles().then(renderPhotoCard);
 }
 
 function renderPhotoCard(data) {
-  const results = data.hits;
+  const results = data;
   const stringTag = results
     .map(
       ({
