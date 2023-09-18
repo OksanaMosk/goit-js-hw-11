@@ -24,15 +24,30 @@ function onSerch(e) {
   e.preventDefault();
   newApiService.searchQuery = e.currentTarget.elements.searchQuery.value;
   newApiService.resetPage();
+
   newApiService.fetchArticles().then(renderPhotoCard);
+  clearService();
 }
 
 function onLoadMore() {
   newApiService.fetchArticles().then(renderPhotoCard);
 }
 
-function renderPhotoCard(data) {
-  const results = data.hits;
+async function renderPhotoCard(data) {
+  const results = await data.hits;
+
+  if (newApiService.searchQuery === '') {
+    Notiflix.Notify.warning('Please fill the field', {
+      timeout: 2000,
+    });
+    return;
+  }
+
+  if (!data.hits.length) {
+    messageError();
+    return;
+  }
+
   const stringTag = results
     .map(
       ({
@@ -44,9 +59,9 @@ function renderPhotoCard(data) {
         comments,
         downloads,
       }) => {
-        return `<div class="photo-card"> <a href="${largeImageURL}">
-        <img src="${webformatURL}" alt="${tags}" loading="lazy" />
-        <div class="info">
+        return `<div class="photo-card"> <a href="${largeImageURL}" class="imageGalleryItem-image">
+        <img src="${webformatURL}" alt="${tags}" class="image-src" loading="lazy" />
+        <div class="info image-info">
         <p class="info-item">
             <b>Likes</b> ${likes}
         </p>
@@ -66,103 +81,28 @@ function renderPhotoCard(data) {
     .join('');
 
   refs.galleryEl.insertAdjacentHTML('beforeend', stringTag);
-
-  new SimpleLightbox('.photo-card a', {
-    captionsData: 'alt',
+  if (data.hits.length) {
+    messageSuccess();
+  }
+  new SimpleLightbox('.gallery a', {
     captionDelay: 250,
   });
 }
 
-//   <div class = "photo-card">
-//   <img src = ${item.webformatURL} alt = ${item.tags}
-//           loading = "lazy"
-//           width = "400"
-//         />
-//         <div clas = "info">
-//           <p class = "info-item">
-//             <b>Likes ${item.likes}</b>
-//           </p>
-//           <p class = "info-item">
-//             <b>Views ${item.views}</b>
-//           </p>
-//           <p class = "info-item">
-//             <b>Comments ${item.comments}</b>
-//           </p>
-//           <p class = "info-item">
-//             <b>Downloads ${item.downloads}</b>
-//           </p>
-//         </div>
-//       </div>
-//     </li>`
-//     )
-//     .join();
+function messageError() {
+  Notiflix.Notify.failure(
+    'Sorry, there are no images matching your search query. Please try again.',
+    {
+      timeout: 2000,
+    }
+  );
+}
 
-//   container.insertAdjacentHTML('beforeend', markup);
-// };
-
-// const fetchItem = () => {
-//   const params = new URLSearchParams({
-//     key: API_KEY,
-//     q: '',
-//     image_type: 'photo',
-//     orientation: 'horizontal',
-//     safesearch: 'true',
-//     page,
-//     per_page: 40,
-//   });
-//   const endpoint = BASE_URL + '/?' + params.toString();
-
-//   return fetch(endpoint).then(res => {
-//     if (res.status === 200) {
-//       return res.json();
-//     }
-//     throw new Error(res.statusText);
-//   });
-// };
-
-// const loadMoreHandler = () => {
-//   page += 1;
-
-//   fetchItem().then(data => console.log(data));
-// };
-
-// fetchItem().then(res => renderList(res.results, photoListEl));
-
-// loadMoreEl.addEventListener('click', loadMoreHandler);
-
-// searchEl.addEventListener('click', handlerSearh);
-
-// const technologies = ['HTML', 'CSS', 'JavaScript', 'React', 'Node'];
-// const list = document.querySelector('.list');
-
-// const markup = technologies
-//   .map(technology => `<li class="list-item">${technology}</li>`)
-//   .join('');
-
-// const arrayList = [];
-// const everyItem = arrayList.tags;
-
-// function handlerSearh(e) {
-//   e.preventDefault();
-//   function functionSearh() {
-//     if (arrayList.tags.includes(itemSearch.tags)) {
-//       arrayList.filter(itemSearch);
-//       divGallery.innerHTML = `<ul>
-//       </ul>`;
-//     }
-//     const itemSearch = e.currentTarget.value;
-//     fetchItem(itemSearch).then(functionSearh);
-//     console.log(everyItem(tags)).catch(error => {
-//       messageError();
-//     });
-//   }
-
-//   function messageError() {
-//     Notiflix.Notify.failure(
-//       'Oops! Something went wrong! Try reloading the page!',
-//       {
-//         timeout: 2000,
-//       }
-//     );
-//   }
-// }
+function clearService() {
+  refs.galleryEl.innerHTML = ' ';
+}
+function messageSuccess() {
+  Notiflix.Notify.success('Hooray! We found totalHits images.', {
+    timeout: 2000,
+  });
+}
