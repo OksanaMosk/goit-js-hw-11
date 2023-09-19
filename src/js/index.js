@@ -1,13 +1,8 @@
-import { BASE_URL, API_KEY } from './constants';
 import NewsApiService from './news-service';
-import axios from 'axios';
 
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-
-const inputEl = document.querySelector('.searchQuery');
-const searchEl = document.querySelector('button');
 
 const refs = {
   serchForm: document.querySelector('.search-form'),
@@ -18,28 +13,55 @@ const refs = {
 const newApiService = new NewsApiService();
 
 refs.serchForm.addEventListener('submit', onSerch);
-refs.loadMoreEl.addEventListener('click', onLoadMore);
+// refs.loadMoreEl.addEventListener('click', onLoadMore);
 
 function onSerch(e) {
   e.preventDefault();
   newApiService.searchQuery = e.currentTarget.elements.searchQuery.value;
   newApiService.resetPage();
 
-  newApiService.fetchArticles().then(renderPhotoCard);
+  newApiService
+    .fetchArticles()
+    .then(renderPhotoCard)
+    .then(results => {
+      observer.observe(guardEl);
+    });
+  const guardEl = document.querySelector('.js-guard');
+  const options = {
+    root: null,
+    rootMargin: '300px',
+    threshold: 0,
+  };
+
+  const handlerIntersection = (entries, observer) => {
+    console.log(entries);
+    console.log(observer);
+    entries.forEach(Intersection => {
+      if (Intersection.isIntersecting) {
+        this.page += 1;
+
+        newApiService.fetchArticles().then(renderPhotoCard);
+
+        if ((this.page = this.totalHits)) {
+          observer.unobserve(Intersection);
+        }
+      }
+    });
+  };
+
   clearService();
+  const observer = new IntersectionObserver(handlerIntersection, options);
 }
 
-function onLoadMore() {
-  newApiService.fetchArticles().then(renderPhotoCard);
-}
+// function onLoadMore() {
+//   newApiService.fetchArticles().then(renderPhotoCard);
+// }
 
 async function renderPhotoCard(data) {
   const results = await data.hits;
 
   if (newApiService.searchQuery === '') {
-    Notiflix.Notify.warning('Please fill the field', {
-      timeout: 2000,
-    });
+    messageWarning();
     return;
   }
 
@@ -86,7 +108,18 @@ async function renderPhotoCard(data) {
   }
   new SimpleLightbox('.gallery a', {
     captionDelay: 250,
+  }).refresh();
+}
+
+function clearService() {
+  refs.galleryEl.innerHTML = ' ';
+}
+
+function messageWarning() {
+  Notiflix.Notify.warning('Please fill the field', {
+    timeout: 2000,
   });
+  messageWarning = () => {};
 }
 
 function messageError() {
@@ -96,13 +129,12 @@ function messageError() {
       timeout: 2000,
     }
   );
+  messageError = () => {};
 }
 
-function clearService() {
-  refs.galleryEl.innerHTML = ' ';
-}
 function messageSuccess() {
   Notiflix.Notify.success('Hooray! We found totalHits images.', {
     timeout: 2000,
   });
+  messageSuccess = () => {};
 }
