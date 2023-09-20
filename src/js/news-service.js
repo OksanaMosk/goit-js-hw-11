@@ -7,7 +7,6 @@ export default class NewsApiService {
     this.page = 1;
   }
   async fetchArticles() {
-    console.log('До', this);
     const url = `${BASE_URL}/?key=${API_KEY}&q=${this.formSearch}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.page}`;
     const response = await axios.get(url);
     const data = await response.data;

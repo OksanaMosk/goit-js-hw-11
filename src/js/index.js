@@ -22,7 +22,10 @@ function onSerch(e) {
 
   newApiService
     .fetchArticles()
-    .then(renderPhotoCard)
+    .then(data => {
+      messageSuccess(data.totalHits);
+      renderPhotoCard(data);
+    })
     .then(results => {
       observer.observe(guardEl);
     });
@@ -34,8 +37,6 @@ function onSerch(e) {
   };
 
   const handlerIntersection = (entries, observer) => {
-    console.log(entries);
-    console.log(observer);
     entries.forEach(Intersection => {
       if (Intersection.isIntersecting) {
         this.page += 1;
@@ -103,9 +104,7 @@ async function renderPhotoCard(data) {
     .join('');
 
   refs.galleryEl.insertAdjacentHTML('beforeend', stringTag);
-  if (data.hits.length) {
-    messageSuccess();
-  }
+
   new SimpleLightbox('.gallery a', {
     captionDelay: 250,
   }).refresh();
@@ -119,7 +118,6 @@ function messageWarning() {
   Notiflix.Notify.warning('Please fill the field', {
     timeout: 2000,
   });
-  messageWarning = () => {};
 }
 
 function messageError() {
@@ -129,12 +127,10 @@ function messageError() {
       timeout: 2000,
     }
   );
-  messageError = () => {};
 }
 
-function messageSuccess() {
-  Notiflix.Notify.success('Hooray! We found totalHits images.', {
+function messageSuccess(totalHits) {
+  Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`, {
     timeout: 2000,
   });
-  messageSuccess = () => {};
 }
