@@ -8,6 +8,7 @@ const btnLoadMore = document.querySelector('.load-more');
 const searchForm = document.querySelector('#search-form');
 
 const imageApiService = new ApiService();
+let per_page = 40;
 
 searchForm.addEventListener('submit', onSearch);
 btnLoadMore.addEventListener('click', onBtnLoadMore);
@@ -36,11 +37,13 @@ async function onSearch(e) {
       isHiddenBtnLoadMore();
       return;
     }
+    messageSuccess();
 
     renderPhotoCard(data);
-    visibleBtnLoadMore();
-    btnLoadMore.disabled = false;
-    messageSuccess();
+
+    if (data.hits.length < per_page) {
+      isHiddenBtnLoadMore();
+    } else visibleBtnLoadMore();
   } catch (error) {
     console.log('error', error);
   }
@@ -63,20 +66,16 @@ function isHiddenBtnLoadMore() {
 async function onBtnLoadMore() {
   try {
     const data = await imageApiService.fetchImage();
-    if (data.hits.length == 0) {
-      Notiflix.Notify.info('This is the end of search results.');
-      btnLoadMore.disabled = true;
-      return;
-    }
-    if (imageApiService.hits > imageApiService.totalHits) {
-      Notiflix.Notify.info('This is the end of search results.');
-      btnLoadMore.disabled = true;
-      return;
-    }
 
     renderPhotoCard(data);
     pageScrolling();
     imageApiService.hits += 40;
+
+    const pageNum = Math.ceil(data.totalHits / per_page);
+    if (imageApiService.page === pageNum + 1) {
+      isHiddenBtnLoadMore();
+      Notiflix.Notify.info('This is the end of search results.');
+    }
   } catch (error) {
     console.log('error', error);
   }
